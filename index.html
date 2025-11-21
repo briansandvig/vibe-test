@@ -86,6 +86,22 @@
       border-color: var(--accent-blue);
       background: #eff5fb;
     }
+    select {
+      width: 110px;
+      padding: 0.5rem 0.7rem;
+      border: 1px solid #cfd8dc;
+      border-radius: 7px;
+      background: var(--input-bg);
+      font-size: 1rem;
+      color: var(--text-main);
+      transition: border-color 0.2s;
+      outline: none;
+      cursor: pointer;
+    }
+    select:focus {
+      border-color: var(--accent-blue);
+      background: #eff5fb;
+    }
     .unit {
       color: var(--text-muted);
       font-size: 1rem;
@@ -128,7 +144,7 @@
         padding: 1rem 0.4rem;
         max-width: 98vw;
       }
-      input[type="number"] {
+      input[type="number"], select {
         width: 80px;
       }
       h1 {
@@ -163,15 +179,18 @@
       <div class="form-row">
         <label for="rate">Interest Rate</label>
         <div class="input-group">
-          <input type="number" id="rate" min="0" max="20" step="0.01" value="6.5"/>
+          <input type="number" id="rate" min="0" max="20" step="0.125" value="6.5"/>
           <span class="unit">%</span>
         </div>
       </div>
       <div class="form-row">
         <label for="years">Loan Term</label>
         <div class="input-group">
-          <input type="number" id="years" min="1" max="40" step="1" value="30" />
-          <span class="unit">Years</span>
+          <select id="years">
+            <option value="30" selected>30 Years</option>
+            <option value="15">15 Years</option>
+            <option value="50">50 Years</option>
+          </select>
         </div>
       </div>
     </form>
