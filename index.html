@@ -71,7 +71,7 @@
       gap: 0.4rem;
       align-items: baseline;
     }
-    input[type="number"] {
+    input[type="number"], input[type="text"] {
       width: 110px;
       padding: 0.5rem 0.7rem;
       border: 1px solid #cfd8dc;
@@ -82,7 +82,7 @@
       transition: border-color 0.2s;
       outline: none;
     }
-    input[type="number"]:focus {
+    input[type="number"]:focus, input[type="text"]:focus {
       border-color: var(--accent-blue);
       background: #eff5fb;
     }
@@ -144,7 +144,7 @@
         padding: 1rem 0.4rem;
         max-width: 98vw;
       }
-      input[type="number"], select {
+      input[type="number"], input[type="text"], select {
         width: 80px;
       }
       h1 {
@@ -164,14 +164,14 @@
         <label for="homeValue">Home Value</label>
         <div class="input-group">
           <span class="unit">$</span>
-          <input type="number" id="homeValue" min="0" step="1000" value="400000" />
+          <input type="text" id="homeValue" value="400,000" />
         </div>
       </div>
       <div class="form-row">
         <label for="downPaymentDollar">Down Payment</label>
         <div class="input-group" style="gap: 0.3rem;">
           <span class="unit">$</span>
-          <input type="number" id="downPaymentDollar" min="0" step="1000" value="80000" style="width:90px" />
+          <input type="text" id="downPaymentDollar" value="80,000" style="width:90px" />
           <input type="number" id="downPaymentPercent" min="0" max="100" step="0.1" value="20" style="width:60px" />
           <span class="unit">%</span>
         </div>
@@ -206,6 +206,21 @@
       return val.toLocaleString("en-US", {style:"currency", currency: "USD", maximumFractionDigits:0});
     }
 
+    // Format number with commas
+    function formatNumberWithCommas(value) {
+      // Remove all non-digit characters
+      const numStr = value.toString().replace(/\D/g, '');
+      if (!numStr) return '';
+      // Add commas
+      return parseInt(numStr, 10).toLocaleString('en-US');
+    }
+
+    // Parse number from formatted string (remove commas)
+    function parseNumber(value) {
+      if (!value) return 0;
+      return parseFloat(value.toString().replace(/,/g, '')) || 0;
+    }
+
     // Principal & Interest Mortgage Calculator
     function calcMonthlyPI(amt, rate, yrs) {
       if (rate === 0) return amt / Math.max(yrs*12, 1);
@@ -222,34 +237,53 @@
     const elYrs = document.getElementById('years');
     const elResult = document.getElementById('result');
 
+    // Format input with commas
+    function formatCurrencyInput(e) {
+      if (e.target === elHome || e.target === elDpD) {
+        const cursorPos = e.target.selectionStart;
+        const oldValue = e.target.value;
+        const newValue = formatNumberWithCommas(oldValue);
+        e.target.value = newValue;
+        
+        // Adjust cursor position after formatting
+        const diff = newValue.length - oldValue.length;
+        e.target.setSelectionRange(cursorPos + diff, cursorPos + diff);
+      }
+    }
+
     // Sync Down Payment $ & %
     function syncDownPayment(e) {
-      let homeVal = parseFloat(elHome.value) || 0;
+      let homeVal = parseNumber(elHome.value);
       if (e.target === elDpD) {
         // $ was edited: update %
-        let dp = Math.max(0, Math.min(parseFloat(elDpD.value) || 0, homeVal));
+        formatCurrencyInput(e);
+        let dp = Math.max(0, Math.min(parseNumber(elDpD.value), homeVal));
         let pct = homeVal ? (dp/homeVal)*100 : 0;
         elDpP.value = pct.toFixed(2).replace('.00','');
       } else if (e.target === elDpP) {
         // % was edited: update $
         let pct = Math.max(0, Math.min(parseFloat(elDpP.value) || 0, 100));
         let dp = homeVal * pct / 100;
-        elDpD.value = Math.round(dp);
+        elDpD.value = formatNumberWithCommas(Math.round(dp).toString());
       }
       updateResult();
     }
     function syncOnHomeVal(e) {
+      // Format home value with commas
+      if (e.target === elHome) {
+        formatCurrencyInput(e);
+      }
       // Update $ from % when home value changes
-      let homeVal = parseFloat(elHome.value) || 0;
+      let homeVal = parseNumber(elHome.value);
       let pct = Math.max(0, Math.min(parseFloat(elDpP.value) || 0, 100));
       let dp = homeVal * pct / 100;
-      elDpD.value = Math.round(dp);
+      elDpD.value = formatNumberWithCommas(Math.round(dp).toString());
       updateResult();
     }
 
     function updateResult() {
-      let home = parseFloat(elHome.value) || 0;
-      let down = Math.max(0, Math.min(parseFloat(elDpD.value) || 0, home));
+      let home = parseNumber(elHome.value);
+      let down = Math.max(0, Math.min(parseNumber(elDpD.value), home));
       let rate = Math.max(0, parseFloat(elRate.value) || 0);
       let yrs  = Math.max(1, parseInt(elYrs.value) || 30);
 
@@ -267,6 +301,9 @@
 
     // Init on load
     window.addEventListener('DOMContentLoaded', function() {
+      // Format initial values
+      elHome.value = formatNumberWithCommas(elHome.value);
+      elDpD.value = formatNumberWithCommas(elDpD.value);
       syncOnHomeVal();
     });
   </script>
