@@ -1,7 +1,255 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mortgage Calculator - Real Estate Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --accent-blue: #2261be;
+      --card-bg: #fff;
+      --body-bg: #f6f8fa;
+      --border-radius: 14px;
+      --shadow: 0 4px 24px rgba(34,97,190,0.08);
+      --text-main: #222d38;
+      --text-muted: #6b7d93;
+      --input-bg: #f6f8fa;
+    }
+    body {
+      background: var(--body-bg);
+      height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 2.5rem 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      min-width: 350px;
+      width: 100%;
+      max-width: 410px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin-bottom: 0.8rem;
+      color: var(--accent-blue);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-align: center;
+      font-size: 2rem;
+    }
+    .form-row {
+      width: 100%;
+      margin-bottom: 1.35rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 0.8rem;
+    }
+    .form-row:last-child {
+      margin-bottom: 0;
+    }
+    label {
+      flex-basis: 44%;
+      color: var(--text-main);
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      font-size: 1rem;
+      margin-bottom: 0.3rem;
+    }
+    .input-group {
+      flex-basis: 100%;
+      display: flex;
+      gap: 0.4rem;
+      align-items: baseline;
+    }
+    input[type="number"] {
+      width: 110px;
+      padding: 0.5rem 0.7rem;
+      border: 1px solid #cfd8dc;
+      border-radius: 7px;
+      background: var(--input-bg);
+      font-size: 1rem;
+      color: var(--text-main);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    input[type="number"]:focus {
+      border-color: var(--accent-blue);
+      background: #eff5fb;
+    }
+    .unit {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-left: 0.1rem;
+      font-weight: 500;
+    }
+    .result-section {
+      margin-top: 2.2rem;
+      width: 100%;
+      text-align: center;
+      background: #e9f1fc;
+      border-radius: 10px;
+      padding: 1.1rem 0.5rem;
+      box-shadow: 0 2px 12px rgba(34,97,190,0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .payment-label {
+      color: var(--text-muted);
+      font-size: 1.06rem;
+      font-weight: 500;
+      margin-bottom: 0.2rem;
+    }
+    .monthly-payment {
+      font-size: 2.1rem;
+      font-weight: bold;
+      color: var(--accent-blue);
+      margin-bottom: 0.17rem;
+    }
+    .small-note {
+      color: var(--text-muted);
+      font-size: 0.93rem;
+      margin-top: 0.29rem;
+      max-width: 90%;
+    }
+    @media (max-width: 500px) {
+      .card {
+        min-width: unset;
+        padding: 1rem 0.4rem;
+        max-width: 98vw;
+      }
+      input[type="number"] {
+        width: 80px;
+      }
+      h1 {
+        font-size: 1.25rem;
+      }
+      .monthly-payment {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
 <body>
-  <h1>Update Loop: Operational</h1>
-  <p>I built this pipeline from scratch!</p>
+  <div class="card">
+    <h1>Mortgage Calculator</h1>
+    <form autocomplete="off" onsubmit="return false;">
+      <div class="form-row">
+        <label for="homeValue">Home Value</label>
+        <div class="input-group">
+          <input type="number" id="homeValue" min="0" step="1000" value="400000" />
+          <span class="unit">$</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="downPaymentDollar">Down Payment</label>
+        <div class="input-group" style="gap: 0.3rem;">
+          <input type="number" id="downPaymentDollar" min="0" step="1000" value="80000" style="width:90px" />
+          <span class="unit">$</span>
+          <input type="number" id="downPaymentPercent" min="0" max="100" step="0.1" value="20" style="width:60px" />
+          <span class="unit">%</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="rate">Interest Rate</label>
+        <div class="input-group">
+          <input type="number" id="rate" min="0" max="20" step="0.01" value="6.5"/>
+          <span class="unit">%</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="years">Loan Term</label>
+        <div class="input-group">
+          <input type="number" id="years" min="1" max="40" step="1" value="30" />
+          <span class="unit">Years</span>
+        </div>
+      </div>
+    </form>
+    <div class="result-section" style="margin-top:2rem;">
+      <span class="payment-label">Monthly Principal &amp; Interest</span>
+      <span class="monthly-payment" id="result">$0</span>
+      <span class="small-note">Estimation only. Excludes taxes, insurance &amp; HOA. <br/> For guidance, consult your mortgage professional.</span>
+    </div>
+  </div>
+  <script>
+    // Utility: Format as currency
+    function toCurrency(val) {
+      return val.toLocaleString("en-US", {style:"currency", currency: "USD", maximumFractionDigits:0});
+    }
+
+    // Principal & Interest Mortgage Calculator
+    function calcMonthlyPI(amt, rate, yrs) {
+      if (rate === 0) return amt / Math.max(yrs*12, 1);
+      let r = rate / 100 / 12;
+      let n = yrs * 12;
+      return amt * r * Math.pow(1+r, n) / (Math.pow(1+r, n)-1);
+    }
+
+    // Inputs
+    const elHome = document.getElementById('homeValue');
+    const elDpD = document.getElementById('downPaymentDollar');
+    const elDpP = document.getElementById('downPaymentPercent');
+    const elRate = document.getElementById('rate');
+    const elYrs = document.getElementById('years');
+    const elResult = document.getElementById('result');
+
+    // Sync Down Payment $ & %
+    function syncDownPayment(e) {
+      let homeVal = parseFloat(elHome.value) || 0;
+      if (e.target === elDpD) {
+        // $ was edited: update %
+        let dp = Math.max(0, Math.min(parseFloat(elDpD.value) || 0, homeVal));
+        let pct = homeVal ? (dp/homeVal)*100 : 0;
+        elDpP.value = pct.toFixed(2).replace('.00','');
+      } else if (e.target === elDpP) {
+        // % was edited: update $
+        let pct = Math.max(0, Math.min(parseFloat(elDpP.value) || 0, 100));
+        let dp = homeVal * pct / 100;
+        elDpD.value = Math.round(dp);
+      }
+      updateResult();
+    }
+    function syncOnHomeVal(e) {
+      // Update $ from % when home value changes
+      let homeVal = parseFloat(elHome.value) || 0;
+      let pct = Math.max(0, Math.min(parseFloat(elDpP.value) || 0, 100));
+      let dp = homeVal * pct / 100;
+      elDpD.value = Math.round(dp);
+      updateResult();
+    }
+
+    function updateResult() {
+      let home = parseFloat(elHome.value) || 0;
+      let down = Math.max(0, Math.min(parseFloat(elDpD.value) || 0, home));
+      let rate = Math.max(0, parseFloat(elRate.value) || 0);
+      let yrs  = Math.max(1, parseInt(elYrs.value) || 30);
+
+      let loan = Math.max(home - down, 0);
+      let payment = (loan > 0) ? calcMonthlyPI(loan, rate, yrs) : 0;
+      elResult.textContent = toCurrency(payment);
+    }
+
+    // Input listeners
+    elHome.addEventListener('input', syncOnHomeVal);
+    elDpD.addEventListener('input', syncDownPayment);
+    elDpP.addEventListener('input', syncDownPayment);
+    elRate.addEventListener('input', updateResult);
+    elYrs.addEventListener('input', updateResult);
+
+    // Init on load
+    window.addEventListener('DOMContentLoaded', function() {
+      syncOnHomeVal();
+    });
+  </script>
 </body>
 </html>
